@@ -1,5 +1,6 @@
 import { sha256OfJcs } from "./hash.ts";
 import { ActualRecordSchema, BundleSchema } from "./schema.ts";
+import { verifyBundleSignature } from "./sign.ts";
 
 export type VerifyResult = {
   verified: boolean;
@@ -23,6 +24,12 @@ export function verify(bundle: unknown, actual: unknown): VerifyResult {
 
   const b = bp.data;
   const a = ap.data;
+
+  // Signature (C3): if present, mutating any other field invalidates it.
+  if (b.signature) {
+    const sigCheck = verifyBundleSignature(b);
+    if (!sigCheck.valid) errors.push(`BadSignature:${sigCheck.reason ?? "invalid"}`);
+  }
 
   // Input hashes (C4 et al.)
   if (sha256OfJcs(a.inputs.system_prompt) !== b.inputs.system_prompt_sha256) {

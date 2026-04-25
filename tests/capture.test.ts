@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { capture } from "../src/capture.ts";
 import { sha256OfJcs } from "../src/hash.ts";
 import { BundleSchema } from "../src/schema.ts";
+import { generateKeyPair, verifyBundleSignature } from "../src/sign.ts";
 
 const baseStep = {
   model: { vendor: "anthropic", id: "claude-opus-4-7" },
@@ -105,5 +106,19 @@ describe("capture", () => {
       tolerance: { level: "byte" },
     });
     expect(bundle.signature).toBeUndefined();
+  });
+
+  test("signs the bundle when a signingKey is given", () => {
+    const kp = generateKeyPair();
+    const bundle = capture(
+      {
+        ...baseStep,
+        expected: { transcript: { foo: "bar" } },
+        tolerance: { level: "byte" },
+      },
+      { signingKey: kp.privateKey },
+    );
+    expect(bundle.signature?.alg).toBe("ed25519");
+    expect(verifyBundleSignature(bundle).valid).toBe(true);
   });
 });

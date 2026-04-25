@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { capture } from "../src/capture.ts";
 import type { ActualRecord, StepRecord } from "../src/schema.ts";
+import { generateKeyPair } from "../src/sign.ts";
 import { verify } from "../src/verify.ts";
 
 const transcript = { messages: [{ role: "assistant", content: "hi there" }] };
@@ -102,5 +103,24 @@ describe("verify (byte tolerance)", () => {
     const r = verify(structuralBundle, matchingActual);
     expect(r.verified).toBe(false);
     expect(r.errors.some((e) => e.includes("UnsupportedTolerance"))).toBe(true);
+  });
+
+  test("passes when a signed bundle's signature is valid", () => {
+    const kp = generateKeyPair();
+    const bundle = capture(step, { signingKey: kp.privateKey });
+    const r = verify(bundle, matchingActual);
+    expect(r.verified).toBe(true);
+  });
+
+  test("fails with BadSignature when a signed bundle is mutated (C3)", () => {
+    const kp = generateKeyPair();
+    const bundle = capture(step, { signingKey: kp.privateKey });
+    const tampered = {
+      ...bundle,
+      sampling: { ...bundle.sampling, temperature: 0.7 },
+    };
+    const r = verify(tampered, matchingActual);
+    expect(r.verified).toBe(false);
+    expect(r.errors.some((e) => e.includes("BadSignature"))).toBe(true);
   });
 });

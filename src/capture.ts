@@ -1,8 +1,14 @@
 import { sha256OfJcs } from "./hash.ts";
 import { type Bundle, BundleSchema, type StepRecord, StepRecordSchema } from "./schema.ts";
+import { signBundle } from "./sign.ts";
 
-/** Build a `rerun.json` v0.1 bundle from a step record. */
-export function capture(input: StepRecord): Bundle {
+export type CaptureOptions = {
+  /** 32-byte Ed25519 private key. If provided, the returned bundle is signed. */
+  signingKey?: Uint8Array;
+};
+
+/** Build a `rerun.json` v0.1 bundle from a step record, optionally signing it. */
+export function capture(input: StepRecord, opts: CaptureOptions = {}): Bundle {
   const step = StepRecordSchema.parse(input);
 
   const bundle: Bundle = {
@@ -28,5 +34,6 @@ export function capture(input: StepRecord): Bundle {
     tolerance: step.tolerance,
   };
 
-  return BundleSchema.parse(bundle);
+  const validated = BundleSchema.parse(bundle);
+  return opts.signingKey ? signBundle(validated, opts.signingKey) : validated;
 }

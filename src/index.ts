@@ -1,5 +1,11 @@
-export { capture } from "./capture.ts";
+export { capture, type CaptureOptions } from "./capture.ts";
 export { verify, type VerifyResult } from "./verify.ts";
+export {
+  generateKeyPair,
+  type KeyPair,
+  signBundle,
+  verifyBundleSignature,
+} from "./sign.ts";
 export {
   type ActualRecord,
   ActualRecordSchema,

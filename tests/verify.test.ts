@@ -124,3 +124,60 @@ describe("verify (byte tolerance)", () => {
     expect(r.errors.some((e) => e.includes("BadSignature"))).toBe(true);
   });
 });
+
+describe("verify (semantic tolerance)", () => {
+  // 4-dim "embeddings" are sufficient to exercise cosine math.
+  const expectedEmbedding = new Float32Array([1, 0, 0, 0]);
+  const matchingEmbedding = new Float32Array([0.9, 0.1, 0, 0]); // cosine ≈ 0.994
+  const farEmbedding = new Float32Array([0, 1, 0, 0]); // cosine = 0
+  const wrongDimEmbedding = new Float32Array([1, 0, 0]);
+
+  function semanticStep(): StepRecord {
+    return {
+      ...step,
+      expected: { semantic_embedding: encode(expectedEmbedding) },
+      tolerance: { level: "semantic", threshold: 0.95 },
+    };
+  }
+
+  function actualWithEmbedding(e: Float32Array): ActualRecord {
+    return {
+      inputs: matchingActual.inputs,
+      output: { embedding: encode(e) },
+    };
+  }
+
+  test("passes when cosine ≥ threshold", () => {
+    const bundle = capture(semanticStep());
+    const r = verify(bundle, actualWithEmbedding(matchingEmbedding));
+    expect(r.verified).toBe(true);
+  });
+
+  test("fails with SemanticBelowThreshold when cosine < threshold", () => {
+    const bundle = capture(semanticStep());
+    const r = verify(bundle, actualWithEmbedding(farEmbedding));
+    expect(r.verified).toBe(false);
+    expect(r.errors.some((e) => e.includes("SemanticBelowThreshold"))).toBe(true);
+  });
+
+  test("fails with EmbeddingDimensionMismatch on dim mismatch", () => {
+    const bundle = capture(semanticStep());
+    const r = verify(bundle, actualWithEmbedding(wrongDimEmbedding));
+    expect(r.verified).toBe(false);
+    expect(r.errors.some((e) => e.includes("EmbeddingDimensionMismatch"))).toBe(true);
+  });
+
+  test("fails when actual is missing an embedding", () => {
+    const bundle = capture(semanticStep());
+    const r = verify(bundle, {
+      inputs: matchingActual.inputs,
+      output: {},
+    });
+    expect(r.verified).toBe(false);
+    expect(r.errors.some((e) => e.toLowerCase().includes("embedding"))).toBe(true);
+  });
+});
+
+function encode(v: Float32Array): string {
+  return Buffer.from(v.buffer, v.byteOffset, v.byteLength).toString("base64");
+}

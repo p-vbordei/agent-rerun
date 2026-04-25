@@ -1,4 +1,5 @@
 export { capture, type CaptureOptions } from "./capture.ts";
+export { cosine, decodeEmbedding, encodeEmbedding } from "./cosine.ts";
 export { verify, type VerifyResult } from "./verify.ts";
 export {
   generateKeyPair,

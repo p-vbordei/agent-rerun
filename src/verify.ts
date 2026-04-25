@@ -1,3 +1,4 @@
+import { cosine, decodeEmbedding } from "./cosine.ts";
 import { sha256OfJcs } from "./hash.ts";
 import { ActualRecordSchema, BundleSchema } from "./schema.ts";
 import { verifyBundleSignature } from "./sign.ts";
@@ -57,10 +58,25 @@ export function verify(bundle: unknown, actual: unknown): VerifyResult {
       }
       break;
     }
-    case "semantic":
-      // Implemented in 2.2.b.
-      errors.push("UnsupportedTolerance:semantic (not in this slice)");
+    case "semantic": {
+      // Schema guarantees expected.semantic_embedding and tolerance.threshold are set.
+      if (!a.output.embedding) {
+        errors.push("MissingEmbedding:actual.output.embedding required for semantic tolerance");
+        break;
+      }
+      const exp = decodeEmbedding(b.expected.semantic_embedding as string);
+      const act = decodeEmbedding(a.output.embedding);
+      if (exp.length !== act.length) {
+        errors.push(`EmbeddingDimensionMismatch:expected ${exp.length}, got ${act.length}`);
+        break;
+      }
+      const sim = cosine(exp, act);
+      const threshold = b.tolerance.threshold as number;
+      if (sim < threshold) {
+        errors.push(`SemanticBelowThreshold:cosine=${sim.toFixed(4)},threshold=${threshold}`);
+      }
       break;
+    }
     case "structural":
       errors.push("UnsupportedTolerance:structural");
       break;

@@ -1,6 +1,6 @@
-# agent-rerun — v0.1 specification (DRAFT)
+# agent-rerun — v0.1 specification
 
-**Status:** draft. Reference implementation in progress; banner flips to 1.0 on release.
+**Status:** stable. Reference implementation at v0.1.0. See [CHANGELOG.md](./CHANGELOG.md) for the release log.
 
 ## Contents
 

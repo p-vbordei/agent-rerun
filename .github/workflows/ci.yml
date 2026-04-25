@@ -1,0 +1,22 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - run: bun install --frozen-lockfile
+      - run: bun x tsc --noEmit
+      - run: bun x biome check .
+      - run: bun test
+      - run: bun run conformance
+      - run: bun build --compile src/cli.ts --outfile dist/rerun
+      - run: ./dist/rerun verify conformance/vectors/c1-byte-replay-passes/bundle.rr conformance/vectors/c1-byte-replay-passes/actual.json

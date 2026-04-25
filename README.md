@@ -2,7 +2,7 @@
 
 > **Portable reproducibility seed bundle for AI-agent steps.** SLSA for agent steps — capture once, verify on any compatible runtime within a declared tolerance.
 
-[![status: 0.0 design](https://img.shields.io/badge/status-0.0%20design-blue)](./SPEC.md) [![spec: v0.1 draft](https://img.shields.io/badge/spec-v0.1%20draft-orange)](./SPEC.md) [![license: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE)
+[![release: v0.1.0](https://img.shields.io/badge/release-v0.1.0-brightgreen)](./CHANGELOG.md) [![spec: v0.1 stable](https://img.shields.io/badge/spec-v0.1%20stable-blue)](./SPEC.md) [![license: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-green)](./LICENSE)
 
 OpenAI's `seed` is best-effort. vLLM determinism is runtime-specific. SLSA proves builds, not LLM outputs. LangSmith replay is proprietary. There is no vendor-agnostic envelope for an LLM step's inputs, params, and expected output that you can sign, share, and verify on a different runtime within a declared tolerance.
 
@@ -43,10 +43,11 @@ console.log(result.verified ? "match" : result.errors);
 | Deliverable | What | Where |
 |---|---|---|
 | Format spec | Normative `rerun.json` v0.1 schema, hashing, signing, tolerance rules | [SPEC.md](./SPEC.md) |
-| Reference library | TypeScript + Bun, ~600 LoC, four runtime dependencies | `src/` (at v0.1.0) |
-| CLI | `rerun capture` and `rerun verify`, single binary via `bun build --compile` | `src/cli.ts` (at v0.1.0) |
-| Conformance vectors | Golden tests covering C1–C4, run in <30s on a fresh checkout | [conformance/](./conformance/) (at v0.1.0) |
-| Demo | 20-line capture → mutate → verify-fails | `examples/demo.ts` (at v0.1.0) |
+| Reference library | TypeScript + Bun, ~600 LoC, four runtime dependencies | [src/](./src) |
+| CLI | `rerun capture` and `rerun verify`, single binary via `bun build --compile` | [src/cli.ts](./src/cli.ts) |
+| Conformance vectors | Eight golden tests covering C1–C4 and four bonus negatives, run in <30 ms | [conformance/](./conformance/) |
+| Demo | 19-line capture → mutate → verify-fails | [examples/demo.ts](./examples/demo.ts) |
+| MiniLM example | Optional pattern for wiring `@huggingface/transformers` as the embedder | [examples/with-minilm.ts](./examples/with-minilm.ts) |
 
 No vendor lock. No external services. The bundle is a self-contained file.
 
@@ -155,20 +156,18 @@ Deferred to v0.2. The bundle stores hashes only (no plaintext inputs), so re-exe
 
 ## Quickstart
 
-> **v0.1.0 is in progress** — see [Roadmap](#roadmap). The commands below are the v0.1.0 shape.
-
 ```bash
 # 1. Install
-bun install agent-rerun
+bun install
 
-# 2. Run the demo (capture → mutate → verify fails)
+# 2. Run the demo (capture → tamper → verify fails)
 bun examples/demo.ts
 
 # 3. Run conformance
 bun run conformance
 ```
 
-Three commands. No services, no API keys, no Docker.
+Three commands. No services, no API keys, no Docker. To install as a dependency in another project: `bun add agent-rerun` (after publishing).
 
 ---
 
@@ -202,13 +201,13 @@ No new crypto, no new wire format. Everything composes primitives already in the
 | Phase | Deliverables | Status |
 |---|---|---|
 | **0.0 — design** | Spec draft, README, scope sheet | shipped |
-| **0.1 — reference impl** | TS + Bun library, CLI, conformance vectors, demo | in progress |
+| **0.1 — reference impl** | TS + Bun library, CLI, conformance vectors, demo | shipped (this release) |
 | **0.2** | `apply` (vendor adapters), `structural` tolerance, JSON Schema export | planned |
-| **1.0** | SPEC banner flip from DRAFT to 1.0, public conformance authority | awaiting v0.1 adoption |
+| **1.0** | Public conformance authority once external implementations land | awaiting adoption |
 
-**v0.1 IN/DEFERRED/CUT:** [SCOPE.md](./SCOPE.md).
+**v0.1 IN / DEFERRED / CUT:** [SCOPE.md](./SCOPE.md). **Release notes:** [CHANGELOG.md](./CHANGELOG.md).
 
-**Sizing target:** ~600 LoC + ~25 conformance fixtures. Four runtime dependencies: `zod`, `@noble/hashes`, `@noble/ed25519`, `canonicalize`.
+**Sizing:** 9 source files, none over 200 lines. Four runtime dependencies: `zod`, `@noble/hashes`, `@noble/ed25519`, `canonicalize`. 69 unit tests + 8 conformance vectors. Full suite under 500 ms.
 
 ---
 
@@ -230,9 +229,10 @@ Full landscape: [`research/`](../research/).
 
 ## Spec and conformance
 
-- [**SPEC.md**](./SPEC.md) — normative v0.1 draft.
+- [**SPEC.md**](./SPEC.md) — normative v0.1.
 - [**SCOPE.md**](./SCOPE.md) — v0.1 IN / DEFERRED / CUT.
-- [**conformance/**](./conformance/) — golden vectors covering C1–C4 (at v0.1.0).
+- [**conformance/**](./conformance/) — golden vectors covering C1–C4 plus four bonus negatives.
+- [**CHANGELOG.md**](./CHANGELOG.md) — release log.
 
 A conforming implementation MUST:
 

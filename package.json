@@ -34,7 +34,5 @@
   "engines": {
     "bun": ">=1.1.0"
   },
-  "trustedDependencies": [
-    "@biomejs/biome"
-  ]
+  "trustedDependencies": ["@biomejs/biome"]
 }

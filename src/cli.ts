@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import type { z } from "zod";
 import { capture } from "./capture.ts";
 import { jcsBytes } from "./jcs.ts";
 import { type StepRecord, StepRecordSchema } from "./schema.ts";
@@ -44,7 +45,12 @@ async function captureCmd(args: string[]) {
     process.stderr.write(USAGE);
     process.exit(1);
   }
-  const step = StepRecordSchema.parse(JSON.parse(await Bun.file(stepPath).text())) as StepRecord;
+  const stepJson = await loadJson(stepPath, "step record");
+  const stepResult = StepRecordSchema.safeParse(stepJson);
+  if (!stepResult.success) {
+    throw new Error(`invalid step record at ${stepPath}: ${formatZodError(stepResult.error)}`);
+  }
+  const step: StepRecord = stepResult.data;
   const signingKey = keyPath ? await loadPrivateKey(keyPath) : undefined;
   const bundle = capture(step, { signingKey });
   await Bun.write(outPath, jcsBytes(bundle));
@@ -56,16 +62,42 @@ async function verifyCmd(args: string[]) {
     process.stderr.write(USAGE);
     process.exit(1);
   }
-  const bundle = JSON.parse(await Bun.file(bundlePath).text());
-  const actual = JSON.parse(await Bun.file(actualPath).text());
+  const bundle = await loadJson(bundlePath, "bundle");
+  const actual = await loadJson(actualPath, "actual record");
   const result = verify(bundle, actual);
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   process.exit(result.verified ? 0 : 1);
 }
 
+async function loadJson(path: string, label: string): Promise<unknown> {
+  let text: string;
+  try {
+    text = await Bun.file(path).text();
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
+    throw new Error(`cannot read ${label} at ${path}: ${reason}`);
+  }
+  try {
+    return JSON.parse(text);
+  } catch (e) {
+    const reason = e instanceof Error ? e.message : String(e);
+    throw new Error(`invalid JSON in ${label} at ${path}: ${reason}`);
+  }
+}
+
 async function loadPrivateKey(path: string): Promise<Uint8Array> {
-  const content = JSON.parse(await Bun.file(path).text()) as { privateKey: string };
+  const content = (await loadJson(path, "key file")) as { privateKey?: string };
+  if (typeof content.privateKey !== "string") {
+    throw new Error(`key file at ${path} is missing a base64 \`privateKey\` field`);
+  }
   return new Uint8Array(Buffer.from(content.privateKey, "base64"));
+}
+
+function formatZodError(err: z.ZodError): string {
+  return err.issues
+    .slice(0, 5)
+    .map((i) => `${i.path.join(".") || "<root>"}: ${i.message}`)
+    .join("; ");
 }
 
 type ParsedArgs = {

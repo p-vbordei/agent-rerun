@@ -140,6 +140,36 @@ describe("CLI: usage", () => {
   });
 });
 
+describe("CLI: error handling", () => {
+  test("missing input file → friendly error mentioning the path", async () => {
+    const r = await runCli(["verify", "/nope/bundle.rr", "/nope/actual.json"]);
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain("/nope/bundle.rr");
+    expect(r.stderr.toLowerCase()).toMatch(/(not found|cannot read|enoent)/);
+  });
+
+  test("invalid JSON in bundle → friendly error mentioning the path", async () => {
+    const bundlePath = join(dir, "bad-bundle.rr");
+    const actualPath = join(dir, "ok-actual.json");
+    writeFileSync(bundlePath, "{not json");
+    writeFileSync(actualPath, JSON.stringify(matchingActual));
+    const r = await runCli(["verify", bundlePath, actualPath]);
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain(bundlePath);
+    expect(r.stderr.toLowerCase()).toContain("json");
+  });
+
+  test("invalid step record → friendly error, not a raw Zod dump", async () => {
+    const stepPath = join(dir, "bad-step.json");
+    const bundlePath = join(dir, "should-not-exist.rr");
+    writeFileSync(stepPath, "{}");
+    const r = await runCli(["capture", stepPath, "-o", bundlePath]);
+    expect(r.exitCode).not.toBe(0);
+    expect(r.stderr).toContain(stepPath);
+    expect(r.stderr.toLowerCase()).toContain("invalid step record");
+  });
+});
+
 describe("CLI: capture is byte-deterministic", () => {
   test("two captures of the same step produce byte-identical files", async () => {
     const stepPath = join(dir, "step-det.json");

@@ -165,6 +165,25 @@ writeVector("schema-violation-rerun-version", {
     "Bundle has the wrong rerun_version. Verify must fail with SchemaViolation before any tolerance check.",
 });
 
+writeVector("strictness-extra-bundle-field", {
+  bundle: { ...capture(baseStep, { signingKey: TEST_PRIVATE_KEY }), MYSTERY: "extra" } as unknown,
+  actual: baseActual,
+  expected: { verified: false, errorContains: ["SchemaViolation"] },
+  description:
+    "Bundle carries an unknown top-level field. Per SPEC §2 strictness, verify must fail with SchemaViolation rather than silently strip it.",
+});
+
+writeVector("strictness-extra-inputs-field", {
+  bundle: ((): unknown => {
+    const b = capture(baseStep, { signingKey: TEST_PRIVATE_KEY });
+    return { ...b, inputs: { ...b.inputs, fake_sha256: `sha256:${"0".repeat(64)}` } };
+  })(),
+  actual: baseActual,
+  expected: { verified: false, errorContains: ["SchemaViolation"] },
+  description:
+    "Bundle carries an unknown field inside `inputs` (e.g. an attacker adds a hash-shaped field). Verify must fail with SchemaViolation.",
+});
+
 console.log(`generated fixtures in ${VECTORS}`);
 
 type Vector = {

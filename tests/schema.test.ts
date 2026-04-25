@@ -93,6 +93,27 @@ describe("BundleSchema", () => {
     });
     expect(r.success).toBe(false);
   });
+
+  test("rejects an extra top-level field (strict)", () => {
+    const r = BundleSchema.safeParse({ ...validByteBundle, MYSTERY: "extra" });
+    expect(r.success).toBe(false);
+  });
+
+  test("rejects an extra field nested in inputs (strict)", () => {
+    const r = BundleSchema.safeParse({
+      ...validByteBundle,
+      inputs: { ...validByteBundle.inputs, fake_sha256: `sha256:${"0".repeat(64)}` },
+    });
+    expect(r.success).toBe(false);
+  });
+
+  test("rejects an extra field nested in model (strict)", () => {
+    const r = BundleSchema.safeParse({
+      ...validByteBundle,
+      model: { ...validByteBundle.model, secretLevel: "top" },
+    });
+    expect(r.success).toBe(false);
+  });
 });
 
 describe("ActualRecordSchema", () => {
@@ -115,5 +136,13 @@ describe("ActualRecordSchema", () => {
       output: { embedding: "AAAA" },
     });
     expect(r.success).toBe(true);
+  });
+
+  test("rejects an extra top-level field in actual (strict)", () => {
+    const r = ActualRecordSchema.safeParse({
+      ...validActualRecord,
+      MYSTERY_ACTUAL: 42,
+    });
+    expect(r.success).toBe(false);
   });
 });

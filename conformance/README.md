@@ -33,6 +33,8 @@ Pass on success (exit 0), fail on any mismatch (exit 1). Total run is ~30 ms.
 | `embedding-dim-mismatch-rejected` | (bonus) | 4-dim expected vs 3-dim actual → fail with EmbeddingDimensionMismatch. |
 | `structural-unsupported` | (bonus, MAY) | tolerance.level === "structural" → fail with UnsupportedTolerance (v0.2 makes structural required). |
 | `schema-violation-rerun-version` | (bonus) | Wrong `rerun_version` → fail with SchemaViolation. |
+| `strictness-extra-bundle-field` | SPEC §2 strictness | Unknown top-level field in bundle → fail with SchemaViolation. |
+| `strictness-extra-inputs-field` | SPEC §2 strictness | Unknown field nested in `inputs` (e.g. a hash-shaped field) → fail with SchemaViolation. |
 
 ## Adding a vector
 

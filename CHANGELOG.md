@@ -46,4 +46,8 @@ Eight vectors covering all four SPEC §7 conformance clauses plus four bonus neg
 
 - The `ext` escape hatch on `tolerance` (referenced in earlier SPEC §3 with no corresponding schema field).
 
-[0.1.0]: https://github.com/USER/agent-rerun/releases/tag/v0.1.0
+### Notes
+
+- **Strict on extras.** The bundle and actual-record schemas reject unknown fields (SPEC §2). Tolerating extras silently was a conformance risk: two implementations encoding the same conceptual bundle could produce different JCS bytes and therefore different signatures. Forward-compatible additions are introduced via `rerun_version` bumps, not by smuggling unknown fields into v0.1 bundles.
+
+[0.1.0]: ./CHANGELOG.md#010--2026-04-25

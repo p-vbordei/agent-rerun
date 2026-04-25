@@ -79,6 +79,8 @@ A bundle is a JSON object with the keys below. Keys marked `?` are optional. All
 
 **Encoding.** Implementations MUST produce JCS-encoded bytes when computing any hash or signature. Numeric and string serialization follows RFC 8785 (sorted keys, no insignificant whitespace, IEEE 754 number formatting).
 
+**Strictness.** Implementations MUST reject bundles that contain unknown fields at any level defined in this section. Forward-compatible extensions are introduced via a `rerun_version` bump, not by smuggling unknown fields into a v0.1 bundle. The same rule applies to the actual-record shape (§5).
+
 ## 3. Tolerance levels
 
 - **`byte`** — `actual.transcript_sha256 == expected.transcript_sha256`. Achievable for `temperature=0` on deterministic runtimes (e.g. vLLM with batch-invariant kernels). Expected to fail cross-vendor; that is a feature, not a bug.

@@ -181,3 +181,41 @@ describe("verify (semantic tolerance)", () => {
 function encode(v: Float32Array): string {
   return Buffer.from(v.buffer, v.byteOffset, v.byteLength).toString("base64");
 }
+
+describe("verify (SPEC §6 — fingerprint drift)", () => {
+  const stepFp: StepRecord = {
+    ...step,
+    model: { ...step.model, fingerprint: "fp_bundle_abc" },
+  };
+
+  test("emits FingerprintDrift warning when actual reports a different fingerprint", () => {
+    const bundle = capture(stepFp);
+    const r = verify(bundle, {
+      ...matchingActual,
+      runtime: { fingerprint: "fp_actual_xyz" },
+    });
+    expect(r.warnings.some((w) => w.includes("FingerprintDrift"))).toBe(true);
+    // Drift alone does not flip `verified`; the tolerance check decides.
+    expect(r.verified).toBe(true);
+  });
+
+  test("no warning when fingerprints match", () => {
+    const bundle = capture(stepFp);
+    const r = verify(bundle, {
+      ...matchingActual,
+      runtime: { fingerprint: "fp_bundle_abc" },
+    });
+    expect(r.warnings).toEqual([]);
+  });
+
+  test("no warning when bundle has no fingerprint or actual has no runtime", () => {
+    const bundleNoFp = capture(step);
+    const r1 = verify(bundleNoFp, {
+      ...matchingActual,
+      runtime: { fingerprint: "fp_actual_xyz" },
+    });
+    expect(r1.warnings).toEqual([]);
+    const r2 = verify(capture(stepFp), matchingActual);
+    expect(r2.warnings).toEqual([]);
+  });
+});

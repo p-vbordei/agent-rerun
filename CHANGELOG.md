@@ -50,4 +50,6 @@ Eight vectors covering all four SPEC §7 conformance clauses plus four bonus neg
 
 - **Strict on extras.** The bundle and actual-record schemas reject unknown fields (SPEC §2). Tolerating extras silently was a conformance risk: two implementations encoding the same conceptual bundle could produce different JCS bytes and therefore different signatures. Forward-compatible additions are introduced via `rerun_version` bumps, not by smuggling unknown fields into v0.1 bundles.
 
+- **Fingerprint drift is a warning, not an error.** When `bundle.model.fingerprint` and `actual.runtime.fingerprint` are both set and differ, `verify` emits a `FingerprintDrift:bundle=<fp>,actual=<fp>` warning. The flag is informational; the tolerance check decides `verified`. The actual-record schema gained an optional `runtime.fingerprint` field for this purpose; SPEC §6 was upgraded from "SHOULD warn" to a normative MUST-warn for the reference implementation. Conformance vector: `fingerprint-drift-warning`.
+
 [0.1.0]: ./CHANGELOG.md#010--2026-04-25

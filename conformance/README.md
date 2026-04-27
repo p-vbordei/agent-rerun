@@ -35,6 +35,7 @@ Pass on success (exit 0), fail on any mismatch (exit 1). Total run is ~30 ms.
 | `schema-violation-rerun-version` | (bonus) | Wrong `rerun_version` → fail with SchemaViolation. |
 | `strictness-extra-bundle-field` | SPEC §2 strictness | Unknown top-level field in bundle → fail with SchemaViolation. |
 | `strictness-extra-inputs-field` | SPEC §2 strictness | Unknown field nested in `inputs` (e.g. a hash-shaped field) → fail with SchemaViolation. |
+| `fingerprint-drift-warning` | SPEC §6 | `bundle.model.fingerprint` differs from `actual.runtime.fingerprint`; semantic tolerance passes; verify emits a `FingerprintDrift` warning. |
 
 ## Adding a vector
 

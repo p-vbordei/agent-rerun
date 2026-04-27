@@ -184,12 +184,41 @@ writeVector("strictness-extra-inputs-field", {
     "Bundle carries an unknown field inside `inputs` (e.g. an attacker adds a hash-shaped field). Verify must fail with SchemaViolation.",
 });
 
+// SPEC §6 — fingerprint drift. Use semantic tolerance so that drift does not also
+// trigger a transcript-hash mismatch; the warning surfaces alongside `verified: true`.
+writeVector("fingerprint-drift-warning", {
+  bundle: capture(
+    {
+      ...baseStep,
+      expected: { semantic_embedding: expectedEmbedding },
+      tolerance: { level: "semantic", threshold: 0.95 },
+    },
+    { signingKey: TEST_PRIVATE_KEY },
+  ),
+  actual: {
+    ...baseActual,
+    output: { embedding: matchingEmbedding },
+    runtime: { fingerprint: "fp_replay_different" },
+  },
+  expected: {
+    verified: true,
+    errorContains: [],
+    warningContains: ["FingerprintDrift"],
+  },
+  description:
+    "SPEC §6: bundle.model.fingerprint is `fp_test`; actual.runtime.fingerprint is `fp_replay_different`. Verify passes on semantic tolerance and emits a FingerprintDrift warning.",
+});
+
 console.log(`generated fixtures in ${VECTORS}`);
 
 type Vector = {
   bundle: unknown;
   actual: unknown;
-  expected: { verified: boolean; errorContains: string[] };
+  expected: {
+    verified: boolean;
+    errorContains: string[];
+    warningContains?: string[];
+  };
   description: string;
 };
 

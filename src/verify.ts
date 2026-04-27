@@ -32,6 +32,15 @@ export function verify(bundle: unknown, actual: unknown): VerifyResult {
     if (!sigCheck.valid) errors.push(`BadSignature:${sigCheck.reason ?? "invalid"}`);
   }
 
+  // Fingerprint drift (SPEC §6): warn if both sides report a fingerprint and they differ.
+  if (
+    b.model.fingerprint !== undefined &&
+    a.runtime?.fingerprint !== undefined &&
+    b.model.fingerprint !== a.runtime.fingerprint
+  ) {
+    warnings.push(`FingerprintDrift:bundle=${b.model.fingerprint},actual=${a.runtime.fingerprint}`);
+  }
+
   // Input hashes (C4 et al.)
   if (sha256OfJcs(a.inputs.system_prompt) !== b.inputs.system_prompt_sha256) {
     errors.push("InputHashMismatch:system_prompt_sha256");

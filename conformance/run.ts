@@ -17,6 +17,7 @@ type Expected = {
   description?: string;
   verified: boolean;
   errorContains?: string[];
+  warningContains?: string[];
 };
 
 const start = Date.now();
@@ -48,7 +49,7 @@ if (failed > 0) process.exit(1);
 
 function checkExpectations(
   expected: Expected,
-  actual: { verified: boolean; errors: string[] },
+  actual: { verified: boolean; errors: string[]; warnings: string[] },
 ): string[] {
   const issues: string[] = [];
   if (actual.verified !== expected.verified) {
@@ -57,6 +58,11 @@ function checkExpectations(
   for (const needle of expected.errorContains ?? []) {
     if (!actual.errors.some((e) => e.includes(needle))) {
       issues.push(`expected an error containing "${needle}", got [${actual.errors.join(", ")}]`);
+    }
+  }
+  for (const needle of expected.warningContains ?? []) {
+    if (!actual.warnings.some((w) => w.includes(needle))) {
+      issues.push(`expected a warning containing "${needle}", got [${actual.warnings.join(", ")}]`);
     }
   }
   return issues;

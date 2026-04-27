@@ -96,6 +96,12 @@ export const ActualRecordSchema = z
         embedding: z.string().optional(),
       })
       .strict(),
+    runtime: z
+      .object({
+        fingerprint: z.string().optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 

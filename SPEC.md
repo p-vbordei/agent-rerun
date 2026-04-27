@@ -127,6 +127,9 @@ An **actual record** is the JSON document supplied to `verify` alongside a bundl
   "output": {
     "transcript?":   {...},                 // scroll-canonical produced transcript
     "embedding?":    "<base64 float32>"     // precomputed embedding for semantic tolerance
+  },
+  "runtime?": {
+    "fingerprint?": "<vendor system fingerprint at replay time>"
   }
 }
 ```
@@ -148,7 +151,7 @@ An **actual record** is the JSON document supplied to `verify` alongside a bundl
 ## 6. Security considerations
 
 - **Signatures are advisory**, not authoritative. A signed bundle tells you who claims these expected outputs; it does not guarantee the model will produce them.
-- **Fingerprint drift**: when `model.fingerprint` differs on replay, verifiers SHOULD warn but MAY still pass if tolerance is `semantic` or `structural`.
+- **Fingerprint drift**: when `bundle.model.fingerprint` is set and `actual.runtime.fingerprint` is set and they differ, verifiers MUST emit a `FingerprintDrift` warning. The warning is informational and does not flip `verified` — the tolerance check decides. (In practice `byte` tolerance with drift will fail on the transcript hash anyway; `semantic` and `structural` are designed to tolerate drift.) The reference implementation emits `FingerprintDrift:bundle=<fp>,actual=<fp>`.
 - **Tamper detection**: mutating bundle bytes invalidates the signature (if present). The input hashes inside the bundle protect input integrity independently of the signature; mutation of `inputs.*_sha256` is detected at the canonical-encoding/JCS layer when a verifier recomputes the hashes from the actual record.
 - **Determinism is best-effort** across vendors. `byte` tolerance is expected to fail cross-vendor; that is a feature, not a bug.
 - **Privacy**: bundles store hashes of inputs, not the inputs themselves. Publishing a bundle does not leak system prompts or tool args. Actual records DO contain plaintext inputs and SHOULD be treated accordingly.

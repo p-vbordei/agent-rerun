@@ -10,15 +10,7 @@
   "bin": {
     "rerun": "src/cli.ts"
   },
-  "files": [
-    "src",
-    "examples",
-    "README.md",
-    "SPEC.md",
-    "SCOPE.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
+  "files": ["src", "examples", "README.md", "SPEC.md", "SCOPE.md", "CHANGELOG.md", "LICENSE"],
   "keywords": [
     "llm",
     "agent",
@@ -52,7 +44,5 @@
   "engines": {
     "bun": ">=1.1.0"
   },
-  "trustedDependencies": [
-    "@biomejs/biome"
-  ]
+  "trustedDependencies": ["@biomejs/biome"]
 }

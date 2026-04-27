@@ -1,7 +1,16 @@
 {
   "name": "agent-rerun",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Portable reproducibility seed bundle for AI-agent steps",
+  "author": "Vlad Bordei <bordeivlad@gmail.com>",
+  "homepage": "https://github.com/p-vbordei/agent-rerun#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/p-vbordei/agent-rerun.git"
+  },
+  "bugs": {
+    "url": "https://github.com/p-vbordei/agent-rerun/issues"
+  },
   "type": "module",
   "main": "src/index.ts",
   "exports": {

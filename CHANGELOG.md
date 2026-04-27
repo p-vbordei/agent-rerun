@@ -4,7 +4,17 @@ All notable changes to `agent-rerun` are documented here. The project uses [Sema
 
 | Package version | Format version | Date |
 |---|---|---|
+| 0.1.1 | rerun.json v0.1 | 2026-04-27 |
 | 0.1.0 | rerun.json v0.1 | 2026-04-25 |
+
+## [0.1.1] — 2026-04-27
+
+Metadata-only patch. No code changes; format and library behavior identical to 0.1.0.
+
+### Added
+- `author`, `homepage`, `repository`, `bugs` fields in `package.json` so npm and downstream tooling can attribute and link the package correctly.
+
+[0.1.1]: ./CHANGELOG.md#011--2026-04-27
 
 ## [0.1.0] — 2026-04-25
 

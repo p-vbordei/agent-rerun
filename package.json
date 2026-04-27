@@ -8,9 +8,27 @@
     ".": "./src/index.ts"
   },
   "bin": {
-    "rerun": "./src/cli.ts"
+    "rerun": "src/cli.ts"
   },
-  "files": ["src", "README.md", "SPEC.md", "SCOPE.md", "LICENSE"],
+  "files": [
+    "src",
+    "examples",
+    "README.md",
+    "SPEC.md",
+    "SCOPE.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "llm",
+    "agent",
+    "reproducibility",
+    "replay",
+    "determinism",
+    "slsa",
+    "ed25519",
+    "jcs"
+  ],
   "license": "Apache-2.0",
   "scripts": {
     "test": "bun test",
@@ -34,5 +52,7 @@
   "engines": {
     "bun": ">=1.1.0"
   },
-  "trustedDependencies": ["@biomejs/biome"]
+  "trustedDependencies": [
+    "@biomejs/biome"
+  ]
 }
